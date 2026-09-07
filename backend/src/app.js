@@ -3,6 +3,7 @@ import morgan from "morgan";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import authRouter from "./routes/auth.routes.js";
+import uploadRouter from "./routes/uploads.route.js";
 const app = express();
 
 app.use(morgan("dev"));
@@ -21,5 +22,5 @@ app.get('/api/health', (req, res) => {
 });
 
 app.use("/api/auth", authRouter);
-
+app.use("/api/documents", uploadRouter);
 export default app;
