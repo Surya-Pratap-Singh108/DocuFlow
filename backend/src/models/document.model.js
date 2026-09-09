@@ -30,6 +30,10 @@ const documentSchema = new mongoose.Schema(
       enum: ["processing", "ready", "failed"],
       default: "processing",
     },
+    extractedText: {
+      type: String,
+      default: "",
+    },
   },
   {
     timestamps: true,

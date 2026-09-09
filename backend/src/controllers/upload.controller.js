@@ -1,5 +1,7 @@
 import {uploadFile} from '../config/imageKit.js';
 import { Document } from '../models/document.model.js';
+import { extractText } from '../services/pdf.services.js';
+import { cleanText } from '../services/text.service.js';
 
 export const uploadController = async (req, res) => {
     try {
@@ -16,20 +18,26 @@ export const uploadController = async (req, res) => {
             fileName: req.file.originalname,
             folder: 'DocuFlow'
         });
+        //parsing the pdf file to extract text
+        const pdfBuffer = req.file.buffer;
+        const extractedText = await extractText(pdfBuffer); 
+        const cleanedText = cleanText(extractedText);
         // Process the uploaded file
         const document = new Document({
             userId: req.userId,
-            title: req.body.title,
+            title: req.body.title || req.file.originalname,
             fileName: req.file.originalname,
-            fileUrl: uploadResult.url
+            fileUrl: uploadResult.url,
+            extractedText: cleanedText,
+            status:'ready',
         });
         await document.save();
 
         return res.status(201).json({
             message: 'File uploaded successfully', 
             document,
-            });
-        
+            cleanedText
+            });        
     } catch (error) {
         console.error('Error uploading file:', error);
         res.status(500).json({ message: 'Error uploading file' });
