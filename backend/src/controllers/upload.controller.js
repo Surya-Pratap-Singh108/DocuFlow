@@ -1,5 +1,7 @@
 import {uploadFile} from '../config/imageKit.js';
+import { Chunk } from '../models/chunk.model.js';
 import { Document } from '../models/document.model.js';
+import { splitDocumentIntoChunks } from '../services/chunks.service.js';
 import { extractText } from '../services/pdf.services.js';
 import { cleanText } from '../services/text.service.js';
 
@@ -8,10 +10,10 @@ export const uploadController = async (req, res) => {
         if (!req.file) {
             return res.status(400).json({ message: 'No file uploaded' });
         }
-        // const isPdfExtension = req.file.originalname.endsWith('.pdf');
-        // if (!isPdfExtension) {
-        //     return res.status(400).json({ message: 'Only PDF files are allowed' });
-        // }
+        const isPdfExtension = req.file.originalname.endsWith('.pdf');
+        if (!isPdfExtension) {
+            return res.status(400).json({ message: 'Only PDF files are allowed' });
+        }
         // Upload the file to ImageKit
         const uploadResult = await uploadFile({
             buffer: req.file.buffer,
@@ -22,6 +24,8 @@ export const uploadController = async (req, res) => {
         const pdfBuffer = req.file.buffer;
         const extractedText = await extractText(pdfBuffer); 
         const cleanedText = cleanText(extractedText);
+        
+        
         // Process the uploaded file
         const document = new Document({
             userId: req.userId,
@@ -29,14 +33,21 @@ export const uploadController = async (req, res) => {
             fileName: req.file.originalname,
             fileUrl: uploadResult.url,
             extractedText: cleanedText,
-            status:'ready',
         });
         await document.save();
+        const chunks = await splitDocumentIntoChunks(cleanedText);
+        const chunkDocuments=chunks.map((chunk,index)=>({
+            documentId: document._id,
+            userId: req.userId,
+            content: chunk,
+            chunkIndex: index
+        }));
+        await Chunk.insertMany(chunkDocuments);
 
         return res.status(201).json({
             message: 'File uploaded successfully', 
             document,
-            cleanedText
+            cleanedText,
             });        
     } catch (error) {
         console.error('Error uploading file:', error);
