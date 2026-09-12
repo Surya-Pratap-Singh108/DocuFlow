@@ -18,7 +18,10 @@ const chunkSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-
+    embedding: {
+    type: [Number],
+    required: false,
+    },
     chunkIndex: {
       type: Number,
       required: true,

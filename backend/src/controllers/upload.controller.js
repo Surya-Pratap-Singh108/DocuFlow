@@ -2,10 +2,12 @@ import {uploadFile} from '../config/imageKit.js';
 import { Chunk } from '../models/chunk.model.js';
 import { Document } from '../models/document.model.js';
 import { splitDocumentIntoChunks } from '../services/chunks.service.js';
+import { generateEmbedding } from '../services/embedding.service.js';
 import { extractText } from '../services/pdf.services.js';
 import { cleanText } from '../services/text.service.js';
 
 export const uploadController = async (req, res) => {
+    let document;
     try {
         if (!req.file) {
             return res.status(400).json({ message: 'No file uploaded' });
@@ -27,7 +29,7 @@ export const uploadController = async (req, res) => {
         
         
         // Process the uploaded file
-        const document = new Document({
+        document = new Document({
             userId: req.userId,
             title: req.body.title || req.file.originalname,
             fileName: req.file.originalname,
@@ -36,21 +38,31 @@ export const uploadController = async (req, res) => {
         });
         await document.save();
         const chunks = await splitDocumentIntoChunks(cleanedText);
-        const chunkDocuments=chunks.map((chunk,index)=>({
-            documentId: document._id,
-            userId: req.userId,
-            content: chunk,
-            chunkIndex: index
-        }));
+
+        const chunkDocuments = await Promise.all(
+            chunks.map(async (chunk, index) => ({
+                documentId: document._id,
+                userId: req.userId,
+                content: chunk,
+                chunkIndex: index,
+                embedding: await generateEmbedding(chunk)
+            }))
+        );
+
         await Chunk.insertMany(chunkDocuments);
+        document.status = "ready";
+        await document.save();
 
         return res.status(201).json({
             message: 'File uploaded successfully', 
-            document,
-            cleanedText,
+            document,            
             });        
     } catch (error) {
+        if (document) {
+            document.status = "failed";
+            await document.save();
+        }
         console.error('Error uploading file:', error);
-        res.status(500).json({ message: 'Error uploading file' });
+        res.status(500).json({ message: 'Error processing document' });
     }
 };

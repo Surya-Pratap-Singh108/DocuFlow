@@ -13,6 +13,7 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "@google/genai": "^2.22.0",
     "@imagekit/nodejs": "^7.11.0",
     "@langchain/core": "^1.2.10",
     "@langchain/textsplitters": "^1.0.1",
