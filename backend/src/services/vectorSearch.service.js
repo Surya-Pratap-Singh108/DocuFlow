@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 
 
-export async function searchRelevantChunks(queryEmbedding,userId) {
+export async function searchRelevantChunks(queryEmbedding,userId,documentId) {
     const collection = mongoose.connection.db.collection("chunks");
 
     const results = await collection.aggregate([
@@ -13,7 +13,8 @@ export async function searchRelevantChunks(queryEmbedding,userId) {
                 numCandidates: 20,
                 limit: 3,
                 filter: {
-                    userId: new mongoose.Types.ObjectId(userId)
+                    userId: new mongoose.Types.ObjectId(userId),
+                    documentId: new mongoose.Types.ObjectId(documentId)
                 }
             },
         },

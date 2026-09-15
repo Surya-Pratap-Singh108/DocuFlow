@@ -1,10 +1,10 @@
 import {uploadFile} from '../config/imageKit.js';
 import { Chunk } from '../models/chunk.model.js';
 import { Document } from '../models/document.model.js';
-import { splitDocumentIntoChunks } from '../services/chunks.service.js';
+import { splitDocumentIntoChunks } from '../services/createChunks.service.js';
 import { generateEmbedding } from '../services/embedding.service.js';
-import { extractText } from '../services/pdf.services.js';
-import { cleanText } from '../services/text.service.js';
+import { extractText } from '../services/pdfParser.service.js';
+import { cleanText } from '../services/cleanText.service.js';
 
 export const uploadController = async (req, res) => {
     let document;
@@ -22,7 +22,7 @@ export const uploadController = async (req, res) => {
             fileName: req.file.originalname,
             folder: 'DocuFlow'
         });
-        //parsing the pdf file to extract text
+        //parsing the pdf file to extract text tjen cleaning the text 
         const pdfBuffer = req.file.buffer;
         const extractedText = await extractText(pdfBuffer); 
         const cleanedText = cleanText(extractedText);
