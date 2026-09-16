@@ -1,4 +1,5 @@
 import 'dotenv/config';
+import './src/config/redis.js';
 import app from "./src/app.js";
 import connectDB from './src/config/db.js';
 
