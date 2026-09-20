@@ -1,3 +1,5 @@
+import mongoose from "mongoose";
+import { Document } from "../models/document.model.js";
 import { generateResponse } from "../services/ai.service.js";
 import { generateEmbedding } from "../services/embedding.service.js";
 import { searchRelevantChunks } from "../services/vectorSearch.service.js";
@@ -11,6 +13,24 @@ export const queryController = async (req, res) => {
     const userId =req.userId; 
     const documentId = req.params.id;
 
+    if (!mongoose.Types.ObjectId.isValid(documentId)) {
+        return res.status(400).json({
+            success: false,
+            message: "Invalid document ID"
+        });
+    }
+
+    const document = await Document.findOne({
+    _id: documentId,
+    userId
+});
+
+    if (!document) {
+        return res.status(404).json({
+            success: false,
+            message: "Document not found"
+        });
+    }
     const queryEmbedding = await generateEmbedding(query);
     const results = await searchRelevantChunks(queryEmbedding, userId, documentId);
 
