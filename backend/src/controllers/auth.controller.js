@@ -159,8 +159,9 @@ export const logoutController = async (req, res) => {
         await User.findByIdAndUpdate(req.userId, { refreshToken: null });
         const cookieOptions = {
             httpOnly: true,
-            sameSite: 'lax',
+            sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
             secure: process.env.NODE_ENV === "production",
+            path: "/",
         };
         res.clearCookie("accessToken", cookieOptions);
         res.clearCookie("refreshToken", cookieOptions);
