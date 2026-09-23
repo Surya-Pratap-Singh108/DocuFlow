@@ -28,13 +28,13 @@ export const signupController = async (req, res) => {
         await user.save();
         res.cookie("accessToken", accessToken, {
             httpOnly: true,
-            sameSite: 'lax',
+            sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
             secure: process.env.NODE_ENV === "production",
             maxAge: 10 * 60 * 1000  //10 min
         });
         res.cookie("refreshToken", refreshToken, {
             httpOnly: true,
-            sameSite: 'lax',
+            sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
             secure: process.env.NODE_ENV === "production",
             maxAge: 7 * 24 * 60 * 60 * 1000  //7 days
         });
@@ -78,13 +78,13 @@ export const loginController = async (req, res) => {
         await isUserExist.save();
         res.cookie("accessToken", accessToken, {
             httpOnly: true,
-            sameSite: 'lax',
+            sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
             secure: process.env.NODE_ENV === "production",
             maxAge: 10 * 60 * 1000  //10 min
         });
         res.cookie("refreshToken", refreshToken, {
             httpOnly: true,
-            sameSite: 'lax',
+            sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
             secure: process.env.NODE_ENV === "production",
             maxAge: 7 * 24 * 60 * 60 * 1000  //7 days
         });
@@ -134,13 +134,13 @@ export const getAccessTokenController = async (req, res) => {
         await user.save();
         res.cookie("accessToken", accessToken, {
             httpOnly: true,
-            sameSite: 'lax',
+            sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
             secure: process.env.NODE_ENV === "production",
             maxAge: 10 * 60 * 1000  //10 min
         });
         res.cookie("refreshToken", newRefreshToken, {
             httpOnly: true,
-            sameSite: 'lax',
+            sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
             secure: process.env.NODE_ENV === "production",
             maxAge: 7 * 24 * 60 * 60 * 1000  //7 days
         });
