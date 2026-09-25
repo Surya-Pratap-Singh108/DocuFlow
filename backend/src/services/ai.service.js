@@ -19,6 +19,7 @@ export const generateResponse = async (query,chunks) => {
         - Do not use outside knowledge.
         - Be accurate and concise.
         `;
+    console.log("FLASH/GEMINI GENERATION CALLED");
     const interaction = await ai.interactions.create({
         model: "gemini-3.6-flash",
         input: prompt,
