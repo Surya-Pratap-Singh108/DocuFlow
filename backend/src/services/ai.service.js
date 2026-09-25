@@ -10,6 +10,7 @@ const ai = new GoogleGenAI({
             attempts: 2,
             initialDelay: 1000,
             maxDelay: 10000,
+            httpStatusCodes: [408, 500, 502, 503, 504],
         },
     },
 });
@@ -46,11 +47,16 @@ export const generateResponse = async (query, chunks) => {
         if (error.status === 429) {
             const retryAfter = error.headers?.get?.("retry-after");
 
-            throw new Error(
-                `AI service is temporarily rate-limited. Please try again shortly.${
-                    retryAfter ? ` Retry after ${retryAfter} seconds.` : ""
+            const rateLimitError = new Error(
+                `AI service is temporarily rate-limited.${
+                    retryAfter
+                        ? ` Please try again in ${retryAfter} seconds.`
+                        : ""
                 }`
             );
+
+            rateLimitError.status = 429;
+            throw rateLimitError;
         }
 
         throw new Error("Failed to generate AI response.");
